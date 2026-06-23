@@ -183,7 +183,7 @@ function ProfilePage() {
                       {listing.status}
                     </p>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      
+                    <a  
                         href={`/listings/${listing.id}`}
                         className="btn btn-outline"
                         style={{ flex: 1, textAlign: 'center' }}
@@ -209,10 +209,7 @@ function ProfilePage() {
       {activeTab === 'create' && (
         <div className="profile-content">
           <h2>Нове оголошення</h2>
-          <form
-            onSubmit={handleCreateListing}
-            className="create-form"
-          >
+          <form onSubmit={handleCreateListing} className="create-form">
             <div className="form-group">
               <label className="form-label">Назва</label>
               <input
@@ -309,14 +306,10 @@ function ProfilePage() {
               />
             </div>
 
-            {createError && (
-              <p className="text-error">{createError}</p>
-            )}
+            {createError && <p className="text-error">{createError}</p>}
 
             {createSuccess && (
-              <p className="text-success">
-                Оголошення створено успішно!
-              </p>
+              <p className="text-success">Оголошення створено успішно!</p>
             )}
 
             <button
@@ -333,10 +326,7 @@ function ProfilePage() {
       {activeTab === 'settings' && (
         <div className="profile-content">
           <h2>Налаштування профілю</h2>
-          <form
-            onSubmit={handleProfileUpdate}
-            className="create-form"
-          >
+          <form onSubmit={handleProfileUpdate} className="create-form">
             <div className="form-group">
               <label className="form-label">Імʼя</label>
               <input
@@ -357,19 +347,13 @@ function ProfilePage() {
                 className="form-input"
                 style={{ opacity: 0.6 }}
               />
-              <small className="text-muted">
-                Email не можна змінити
-              </small>
+              <small className="text-muted">Email не можна змінити</small>
             </div>
 
-            {profileError && (
-              <p className="text-error">{profileError}</p>
-            )}
+            {profileError && <p className="text-error">{profileError}</p>}
 
             {profileSuccess && (
-              <p className="text-success">
-                Профіль оновлено успішно!
-              </p>
+              <p className="text-success">Профіль оновлено успішно!</p>
             )}
 
             <button

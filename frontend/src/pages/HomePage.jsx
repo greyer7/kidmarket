@@ -142,7 +142,7 @@ function HomePage() {
                 <p className="listing-card__category">
                   {listing.category}
                 </p>
-                
+                <a
                   href={`/listings/${listing.id}`}
                   className="btn btn-primary listing-card__btn"
                 >
