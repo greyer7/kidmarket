@@ -42,3 +42,5 @@ desktop.ini
 
 # Alembic
 alembic/versions/*.pyc
+
+frontend/.vite/
