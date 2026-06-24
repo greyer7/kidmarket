@@ -8,12 +8,16 @@ from app.core.config import settings
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password[:72])
+def _truncate_password(password: str) -> bytes:
+    """Обрізає пароль до 72 байтів (ліміт bcrypt)."""
+    encoded = password.encode('utf-8')
+    return encoded[:72]
 
+def hash_password(password: str) -> str:
+    return pwd_context.hash(_truncate_password(password))
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password[:72], hashed_password)
+    return pwd_context.verify(_truncate_password(plain_password), hashed_password)
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
