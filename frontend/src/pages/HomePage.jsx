@@ -2,6 +2,17 @@ import { useState, useEffect } from 'react'
 import apiClient from '../api/client.js'
 import Loader from '../components/common/Loader.jsx'
 
+const getFirstImage = (image_urls) => {
+  if (!image_urls) return null
+  try {
+    const urls = JSON.parse(image_urls)
+    if (Array.isArray(urls) && urls.length > 0) return urls[0]
+    return null
+  } catch {
+    return null
+  }
+}
+
 function HomePage() {
   const [listings, setListings] = useState([])
   const [loading, setLoading] = useState(true)
@@ -122,35 +133,35 @@ function HomePage() {
 
       {!loading && !error && listings.length > 0 && (
         <div className="listings-grid">
-          {listings.map((listing) => (
-            <div key={listing.id} className="listing-card">
-              <div className="listing-card__image">
-                {listing.image_urls ? (
-                  <img
-                    src={JSON.parse(listing.image_urls)[0]}
-                    alt={listing.title}
-                  />
-                ) : (
-                  <div className="listing-card__no-image">🧸</div>
-                )}
+          {listings.map((listing) => {
+            const firstImage = getFirstImage(listing.image_urls)
+            return (
+              <div key={listing.id} className="listing-card">
+                <div className="listing-card__image">
+                  {firstImage ? (
+                    <img src={firstImage} alt={listing.title} />
+                  ) : (
+                    <div className="listing-card__no-image">🧸</div>
+                  )}
+                </div>
+                <div className="listing-card__body">
+                  <h3 className="listing-card__title">{listing.title}</h3>
+                  <p className="listing-card__price">
+                    {listing.price} грн
+                  </p>
+                  <p className="listing-card__category">
+                    {listing.category}
+                  </p>
+                  <a
+                    href={`/listings/${listing.id}`}
+                    className="btn btn-primary listing-card__btn"
+                  >
+                    Переглянути
+                  </a>
+                </div>
               </div>
-              <div className="listing-card__body">
-                <h3 className="listing-card__title">{listing.title}</h3>
-                <p className="listing-card__price">
-                  {listing.price} грн
-                </p>
-                <p className="listing-card__category">
-                  {listing.category}
-                </p>
-                <a
-                  href={`/listings/${listing.id}`}
-                  className="btn btn-primary listing-card__btn"
-                >
-                  Переглянути
-                </a>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>
