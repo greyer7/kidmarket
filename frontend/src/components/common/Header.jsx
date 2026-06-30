@@ -26,6 +26,11 @@ function Header() {
         <div className="header__actions">
           {isAuthenticated ? (
             <>
+              {user?.is_admin && (
+                <Link to="/admin" className="header__nav-link">
+                  Адмін-панель
+                </Link>
+              )}
               <Link to="/profile" className="header__user">
                 {user?.full_name}
               </Link>

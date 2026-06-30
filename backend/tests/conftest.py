@@ -10,16 +10,23 @@ TEST_DATABASE_URL = os.getenv("DATABASE_URL")
 
 
 @pytest.fixture
-async def client():
+async def db_session():
     engine = create_async_engine(TEST_DATABASE_URL, echo=False)
     TestingSessionLocal = sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
 
     session = TestingSessionLocal()
+    yield session
 
+    await session.close()
+    await engine.dispose()
+
+
+@pytest.fixture
+async def client(db_session):
     async def override_get_db():
-        yield session
+        yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
 
@@ -29,6 +36,4 @@ async def client():
     ) as ac:
         yield ac
 
-    await session.close()
     app.dependency_overrides.clear()
-    await engine.dispose()
