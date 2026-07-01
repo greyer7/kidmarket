@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import os
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -10,6 +13,9 @@ from app.users.schemas import UserPublicResponse
 from app.users.service import get_user_public, get_all_users, deactivate_user
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+UPLOAD_DIR = "/app/uploads/avatars"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 @router.get(
@@ -43,6 +49,37 @@ async def update_me(
     db: AsyncSession = Depends(get_db),
 ) -> UserResponse:
     updated_user = await update_user(current_user, data, db)
+    return UserResponse.model_validate(updated_user)
+
+
+@router.post(
+    "/me/avatar",
+    response_model=UserResponse,
+)
+async def upload_avatar(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+) -> UserResponse:
+    if file.content_type not in ["image/jpeg", "image/png", "image/webp"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Дозволені тільки jpeg, png, webp",
+        )
+
+    ext = file.filename.split(".")[-1]
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    filepath = os.path.join(UPLOAD_DIR, filename)
+
+    with open(filepath, "wb") as f:
+        content = await file.read()
+        f.write(content)
+
+    updated_user = await update_user(
+        current_user,
+        UserUpdate(avatar_url=f"/uploads/avatars/{filename}"),
+        db,
+    )
     return UserResponse.model_validate(updated_user)
 
 

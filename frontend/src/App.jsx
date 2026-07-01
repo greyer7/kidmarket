@@ -6,6 +6,7 @@ import RegisterPage from './pages/RegisterPage.jsx'
 import ListingPage from './pages/ListingPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import AdminPage from './pages/AdminPage.jsx'
+import ChatPage from './pages/ChatPage.jsx'
 import Header from './components/common/Header.jsx'
 import Footer from './components/common/Footer.jsx'
 
@@ -38,6 +39,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/chat"
+              element={
+                <ProtectedRoute>
+                  <ChatPage />
                 </ProtectedRoute>
               }
             />

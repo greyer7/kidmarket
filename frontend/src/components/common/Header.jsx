@@ -21,6 +21,11 @@ function Header() {
           <Link to="/" className="header__nav-link">
             Оголошення
           </Link>
+          {isAuthenticated && (
+            <Link to="/chat" className="header__nav-link">
+              Повідомлення
+            </Link>
+          )}
         </nav>
 
         <div className="header__actions">
@@ -34,10 +39,7 @@ function Header() {
               <Link to="/profile" className="header__user">
                 {user?.full_name}
               </Link>
-              <button
-                onClick={handleLogout}
-                className="btn btn-outline"
-              >
+              <button onClick={handleLogout} className="btn btn-outline">
                 Вийти
               </button>
             </>

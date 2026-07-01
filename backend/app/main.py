@@ -1,7 +1,9 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.core.redis import close_redis, init_redis
 from app.auth.router import router as auth_router
@@ -10,6 +12,11 @@ from app.listings.router import router as listings_router
 from app.reviews.router import router as reviews_router
 from app.chat.router import router as chat_router
 from app.admin.router import router as admin_router
+
+UPLOAD_DIR = "/app/uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(f"{UPLOAD_DIR}/avatars", exist_ok=True)
+os.makedirs(f"{UPLOAD_DIR}/listings", exist_ok=True)
 
 
 @asynccontextmanager
@@ -34,6 +41,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 app.include_router(auth_router, prefix="/api")
 app.include_router(users_router, prefix="/api")
