@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import apiClient from '../api/client.js'
 import { useAuthStore } from '../store/authStore.js'
 import Loader from '../components/common/Loader.jsx'
@@ -160,9 +160,16 @@ function ListingPage() {
             <div className="listing-page__message">
               <h3>Написати продавцю</h3>
               {messageSent ? (
-                <p className="text-success">
-                  Повідомлення відправлено!
-                </p>
+                <div>
+                  <p className="text-success">Повідомлення відправлено!</p>
+                  <Link
+                    to={`/chat?user=${listing.seller_id}&listing=${id}`}
+                    className="btn btn-outline"
+                    style={{ marginTop: '8px', display: 'inline-block' }}
+                  >
+                    Перейти до чату
+                  </Link>
+                </div>
               ) : (
                 <form onSubmit={handleMessage}>
                   <textarea
