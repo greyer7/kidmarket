@@ -128,8 +128,56 @@ function ProfilePage() {
   return (
     <div className="profile-page">
       <div className="profile-header">
-        <div className="profile-avatar">
-          {user?.full_name?.[0]?.toUpperCase() || '?'}
+        <div className="profile-avatar" style={{ position: 'relative', overflow: 'visible' }}>
+          {user?.avatar_url ? (
+            <img
+              src={user.avatar_url}
+              alt="avatar"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+            />
+          ) : (
+            user?.full_name?.[0]?.toUpperCase() || '?'
+          )}
+          <label
+            htmlFor="avatar-upload"
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              background: 'var(--color-primary)',
+              color: '#fff',
+              borderRadius: '50%',
+              width: '24px',
+              height: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              fontSize: '14px',
+            }}
+          >
+            ✏️
+          </label>
+          <input
+            id="avatar-upload"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            style={{ display: 'none' }}
+            onChange={async (e) => {
+              const file = e.target.files[0]
+              if (!file) return
+              const formData = new FormData()
+              formData.append('file', file)
+              try {
+                const response = await apiClient.post('/users/me/avatar', formData, {
+                  headers: { 'Content-Type': 'multipart/form-data' },
+                })
+                updateUser(response.data)
+              } catch {
+                alert('Помилка завантаження аватарки')
+              }
+            }}
+          />
         </div>
         <div>
           <h1 className="profile-name">{user?.full_name}</h1>
@@ -183,7 +231,7 @@ function ProfilePage() {
                       {listing.status}
                     </p>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                    <a  
+                      <a
                         href={`/listings/${listing.id}`}
                         className="btn btn-outline"
                         style={{ flex: 1, textAlign: 'center' }}
@@ -292,18 +340,44 @@ function ProfilePage() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">
-                URL фото (необовʼязково)
-              </label>
-              <input
-                type="url"
-                value={newListing.image_urls}
-                onChange={(e) =>
-                  setNewListing({ ...newListing, image_urls: e.target.value })
-                }
-                placeholder="https://..."
-                className="form-input"
-              />
+              <label className="form-label">Фото (необов'язково)</label>
+              {newListing.image_urls ? (
+                <div style={{ marginBottom: '8px' }}>
+                  <img
+                    src={newListing.image_urls}
+                    alt="preview"
+                    style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '8px' }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    style={{ marginLeft: '8px' }}
+                    onClick={() => setNewListing({ ...newListing, image_urls: '' })}
+                  >
+                    Видалити
+                  </button>
+                </div>
+              ) : (
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="form-input"
+                  onChange={async (e) => {
+                    const file = e.target.files[0]
+                    if (!file) return
+                    const formData = new FormData()
+                    formData.append('file', file)
+                    try {
+                      const response = await apiClient.post('/listings/upload-image', formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                      })
+                      setNewListing({ ...newListing, image_urls: response.data.url })
+                    } catch {
+                      setCreateError('Помилка завантаження фото')
+                    }
+                  }}
+                />
+              )}
             </div>
 
             {createError && <p className="text-error">{createError}</p>}

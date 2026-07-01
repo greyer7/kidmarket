@@ -1,4 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import os
+import uuid
+import json
+
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
@@ -21,6 +25,9 @@ from app.listings.service import (
 )
 
 router = APIRouter(prefix="/listings", tags=["listings"])
+
+UPLOAD_DIR = "/app/uploads/listings"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 @router.get(
@@ -47,6 +54,31 @@ async def list_my_listings(
 ) -> list[ListingShortResponse]:
     listings = await get_seller_listings(current_user.id, db)
     return [ListingShortResponse.model_validate(l) for l in listings]
+
+
+@router.post(
+    "/upload-image",
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_listing_image(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_active_user),
+) -> dict:
+    if file.content_type not in ["image/jpeg", "image/png", "image/webp"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Дозволені тільки jpeg, png, webp",
+        )
+
+    ext = file.filename.split(".")[-1]
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    filepath = os.path.join(UPLOAD_DIR, filename)
+
+    with open(filepath, "wb") as f:
+        content = await file.read()
+        f.write(content)
+
+    return {"url": f"/uploads/listings/{filename}"}
 
 
 @router.post(
