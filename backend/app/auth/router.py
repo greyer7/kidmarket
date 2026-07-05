@@ -7,8 +7,12 @@ from app.auth.schemas import UserRegister, UserResponse, TokenResponse
 from app.auth.service import register_user, login_user
 from app.auth.dependencies import get_current_active_user
 from app.auth.models import User
+from app.auth.google_oauth import router as google_router
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+# Підключаємо ендпоінти Google OAuth (/auth/google, /auth/google/callback)
+router.include_router(google_router)
 
 
 @router.post(

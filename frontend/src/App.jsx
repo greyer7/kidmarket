@@ -3,6 +3,7 @@ import { useAuthStore } from './store/authStore.js'
 import HomePage from './pages/HomePage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import RegisterPage from './pages/RegisterPage.jsx'
+import GoogleCallbackPage from './pages/GoogleCallbackPage.jsx'
 import ListingPage from './pages/ListingPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import AdminPage from './pages/AdminPage.jsx'
@@ -33,6 +34,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/auth/callback" element={<GoogleCallbackPage />} />
             <Route path="/listings/:id" element={<ListingPage />} />
             <Route
               path="/profile"

@@ -28,6 +28,12 @@ class Settings(BaseSettings):
 
     # Frontend
     VITE_API_URL: str = "http://localhost/api"
+    FRONTEND_URL: str = "http://localhost"
+
+    # Google OAuth 2.0 (без дефолтів - обов'язково задати в .env)
+    GOOGLE_CLIENT_ID: str
+    GOOGLE_CLIENT_SECRET: str
+    GOOGLE_REDIRECT_URI: str = "http://localhost/api/auth/google/callback"
 
 
 settings = Settings()

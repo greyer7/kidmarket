@@ -43,6 +43,23 @@ export const useAuthStore = create(
         })
       },
 
+      // Використовується після повернення з Google OAuth (GoogleCallbackPage) -
+      // токен вже готовий (виданий бекендом), тут лише зберігаємо його
+      // і підтягуємо профіль користувача, як і при звичайному логіні.
+      loginWithGoogleToken: async (token) => {
+        const profileResponse = await apiClient.get('/users/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        set({
+          token,
+          user: profileResponse.data,
+          isAuthenticated: true,
+        })
+      },
+
       logout: () => {
         set({
           user: null,
