@@ -16,6 +16,9 @@ passlib[bcrypt]==1.7.4
 bcrypt==4.0.1
 python-multipart==0.0.20
 
+# OAuth 2.0
+authlib==1.3.2
+
 # Settings
 pydantic==2.11.5
 pydantic-settings==2.9.1

@@ -44,3 +44,5 @@ desktop.ini
 alembic/versions/*.pyc
 
 frontend/.vite/
+
+backend/uploads/

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.cache import get_cached, set_cached, invalidate_pattern
 from app.auth.models import User
 from app.auth.dependencies import get_current_active_user
 from app.listings.models import Listing
@@ -30,6 +31,18 @@ UPLOAD_DIR = "/app/uploads/listings"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
+LISTINGS_CACHE_TTL = 30
+
+
+def build_listings_cache_key(
+    category: str | None,
+    min_price: float | None,
+    max_price: float | None,
+) -> str:
+    
+    return f"listings:all:category={category}:min_price={min_price}:max_price={max_price}"
+
+
 @router.get(
     "/",
     response_model=list[ListingShortResponse],
@@ -40,8 +53,21 @@ async def list_listings(
     max_price: float | None = None,
     db: AsyncSession = Depends(get_db),
 ) -> list[ListingShortResponse]:
+    cache_key = build_listings_cache_key(category, min_price, max_price)
+
+    
+    cached_result = await get_cached(cache_key)
+    if cached_result is not None:
+        return cached_result
+
     listings = await get_all_listings(db, category, min_price, max_price)
-    return [ListingShortResponse.model_validate(l) for l in listings]
+    result = [ListingShortResponse.model_validate(l) for l in listings]
+
+    
+    serializable_result = [item.model_dump(mode="json") for item in result]
+    await set_cached(cache_key, serializable_result, LISTINGS_CACHE_TTL)
+
+    return result
 
 
 @router.get(
@@ -92,6 +118,10 @@ async def create_new_listing(
     db: AsyncSession = Depends(get_db),
 ) -> ListingResponse:
     listing = await create_listing(data, current_user, db)
+
+  
+    await invalidate_pattern("listings:all:*")
+
     return ListingResponse.model_validate(listing)
 
 
@@ -134,6 +164,9 @@ async def update_existing_listing(
             detail="Ви не можете редагувати чуже оголошення",
         )
     updated = await update_listing(listing, data, db)
+
+    await invalidate_pattern("listings:all:*")
+
     return ListingResponse.model_validate(updated)
 
 
@@ -158,3 +191,5 @@ async def delete_existing_listing(
             detail="Ви не можете видалити чуже оголошення",
         )
     await delete_listing(listing, db)
+
+    await invalidate_pattern("listings:all:*")

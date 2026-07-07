@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore.js'
+import apiClient from '../api/client.js'
 
 function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
 
   const { login } = useAuthStore()
   const navigate = useNavigate()
@@ -25,6 +27,21 @@ function LoginPage() {
       )
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    setError('')
+    setGoogleLoading(true)
+
+    try {
+      const response = await apiClient.get('/auth/google')
+      // Переходимо на сторінку Google - користувач залишить наш сайт,
+      // тому це window.location, а не react-router navigate.
+      window.location.href = response.data.authorize_url
+    } catch (err) {
+      setError('Не вдалося розпочати вхід через Google. Спробуйте ще раз.')
+      setGoogleLoading(false)
     }
   }
 
@@ -74,6 +91,17 @@ function LoginPage() {
             {loading ? 'Завантаження...' : 'Увійти'}
           </button>
         </form>
+
+        <div className="auth-divider">або</div>
+
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          disabled={googleLoading}
+          className="btn btn-google auth-submit"
+        >
+          {googleLoading ? 'Перенаправлення...' : 'Увійти через Google'}
+        </button>
       </div>
     </div>
   )
