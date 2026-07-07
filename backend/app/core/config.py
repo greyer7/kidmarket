@@ -30,10 +30,18 @@ class Settings(BaseSettings):
     VITE_API_URL: str = "http://localhost/api"
     FRONTEND_URL: str = "http://localhost"
 
-    # Google OAuth 2.0 (без дефолтів - обов'язково задати в .env)
+    # Google OAuth 2.0 
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
     GOOGLE_REDIRECT_URI: str = "http://localhost/api/auth/google/callback"
+
+    # SMTP 
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str
+    SMTP_PASSWORD: str
+    SMTP_FROM_EMAIL: str
+    SMTP_FROM_NAME: str = "KidMarket"
 
 
 settings = Settings()
