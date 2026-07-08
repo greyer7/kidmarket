@@ -47,3 +47,10 @@ class TokenResponse(BaseModel):
 class TokenPayload(BaseModel):
     sub: str
     exp: datetime
+
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr
