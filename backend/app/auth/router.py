@@ -29,7 +29,6 @@ from app.auth.google_oauth import router as google_router
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-# Підключаємо ендпоінти Google OAuth (/auth/google, /auth/google/callback)
 router.include_router(google_router)
 
 

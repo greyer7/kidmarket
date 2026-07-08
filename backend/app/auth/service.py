@@ -8,9 +8,7 @@ from app.core.redis import get_redis
 from app.auth.models import User
 from app.auth.schemas import UserRegister, UserUpdate, TokenResponse
 
-# Скільки секунд посилання для скидання пароля лишається дійсним.
-# Довше за OAuth-state (5 хв), бо тут юзеру треба встигнути відкрити
-# поштову скриньку - на відміну від OAuth, де редірект миттєвий.
+
 PASSWORD_RESET_TTL_SECONDS = 900  # 15 хвилин
 
 # Підтвердження email - дія некритична й нетермінова (на відміну від
@@ -71,14 +69,7 @@ async def update_user(user: User, data: UserUpdate, db: AsyncSession) -> User:
 
 
 async def create_password_reset_token(email: str, db: AsyncSession) -> tuple[User, str] | None:
-    """
-    Генерує одноразовий токен для скидання пароля і зберігає його в Redis.
-
-    Повертає None, якщо юзера з таким email не існує - роутер НЕ повинен
-    розкривати цю інформацію клієнту (захист від "user enumeration":
-    зловмисник міг би перебирати email-адреси і за різницею відповіді
-    дізнаватись, які з них зареєстровані в системі).
-    """
+    
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
     if user is None:
@@ -98,10 +89,7 @@ async def create_password_reset_token(email: str, db: AsyncSession) -> tuple[Use
 
 
 async def reset_password_with_token(token: str, new_password: str, db: AsyncSession) -> None:
-    """
-    Перевіряє токен із Redis і, якщо він дійсний, оновлює пароль користувача.
-    Кидає ValueError з зрозумілим повідомленням, якщо токен недійсний/протух.
-    """
+    
     redis = await get_redis()
     if redis is None:
         raise ValueError("Сервіс тимчасово недоступний, спробуйте пізніше")
@@ -112,8 +100,7 @@ async def reset_password_with_token(token: str, new_password: str, db: AsyncSess
     if user_id_raw is None:
         raise ValueError("Посилання для скидання пароля недійсне або застаріло")
 
-    # Токен одноразовий - видаляємо одразу, щоб ним не можна було
-    # скористатись повторно (наприклад, якщо лист хтось перехопив раніше).
+    
     await redis.delete(redis_key)
 
     user = await get_user_by_id(int(user_id_raw), db)
@@ -126,11 +113,7 @@ async def reset_password_with_token(token: str, new_password: str, db: AsyncSess
 
 
 async def create_email_verification_token(user: User) -> str:
-    """
-    Генерує токен підтвердження email для ВЖЕ ІСНУЮЧОГО об'єкта User
-    (викликається одразу після register_user, юзер уже є в пам'яті -
-    повторний похід у БД за ним не потрібен).
-    """
+   
     token = secrets.token_urlsafe(32)
 
     redis = await get_redis()
@@ -145,10 +128,7 @@ async def create_email_verification_token(user: User) -> str:
 
 
 async def verify_email_with_token(token: str, db: AsyncSession) -> None:
-    """
-    Перевіряє токен підтвердження email і, якщо він дійсний,
-    проставляє is_verified=True користувачу.
-    """
+    
     redis = await get_redis()
     if redis is None:
         raise ValueError("Сервіс тимчасово недоступний, спробуйте пізніше")
@@ -171,14 +151,7 @@ async def verify_email_with_token(token: str, db: AsyncSession) -> None:
 
 
 async def create_resend_verification_token(email: str, db: AsyncSession) -> tuple[User, str] | None:
-    """
-    Те саме, що й create_password_reset_token за духом (захист від
-    user enumeration - повертає None, якщо email не знайдено).
-
-    Додатково повертає None і тоді, коли юзер УЖЕ підтверджений -
-    надсилати ще один лист підтвердження в такому разі не має сенсу,
-    хоча роутер все одно покаже клієнту той самий нейтральний текст.
-    """
+    
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
     if user is None or user.is_verified:

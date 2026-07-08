@@ -49,7 +49,11 @@ def send_google_login_notification(to_email: str, full_name: str) -> None:
     send_email(to_email, subject, html_body)
 
 def send_verification_email(to_email: str, full_name: str, verify_link: str) -> None:
-    
+    """
+    Лист із посиланням для підтвердження email при звичайній реєстрації
+    (email+пароль). Google-юзери отримують is_verified=True одразу,
+    цей лист їм не потрібен.
+    """
     subject = "Підтвердіть свій email - KidMarket"
     html_body = f"""
     <html>
@@ -66,6 +70,37 @@ def send_verification_email(to_email: str, full_name: str, verify_link: str) -> 
             </p>
             <p>Посилання дійсне протягом 24 годин.</p>
             <p>Якщо ви не реєструвались у KidMarket - просто проігноруйте цей лист.</p>
+            <hr>
+            <p style="color: #888; font-size: 12px;">
+                Це автоматичний лист, будь ласка, не відповідайте на нього.
+            </p>
+        </body>
+    </html>
+    """
+    send_email(to_email, subject, html_body)
+
+
+def send_password_reset_email(to_email: str, full_name: str, reset_link: str) -> None:
+    """
+    Лист із посиланням для скидання пароля.
+    Викликається як фонова задача з auth/router.py.
+    """
+    subject = "Скидання пароля - KidMarket"
+    html_body = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <h2>Привіт, {full_name}!</h2>
+            <p>Ви (або хтось від вашого імені) запросили скидання пароля для акаунту KidMarket.</p>
+            <p>
+                <a href="{reset_link}"
+                   style="display: inline-block; padding: 12px 24px; background-color: #4F46E5;
+                          color: #ffffff; text-decoration: none; border-radius: 6px;">
+                    Встановити новий пароль
+                </a>
+            </p>
+            <p>Посилання дійсне протягом 15 хвилин.</p>
+            <p>Якщо ви не запитували скидання пароля - просто проігноруйте цей лист,
+               ваш пароль залишиться без змін.</p>
             <hr>
             <p style="color: #888; font-size: 12px;">
                 Це автоматичний лист, будь ласка, не відповідайте на нього.
