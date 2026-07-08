@@ -1,14 +1,3 @@
-"""
-Відправка email-нотифікацій через Gmail SMTP.
-
-Використовує ТІЛЬКИ вбудовані модулі Python (smtplib, email) -
-жодних додаткових pip-залежностей не потрібно.
-
-ВАЖЛИВО: функції тут - ЗВИЧАЙНІ (не async), навмисно. FastAPI BackgroundTasks
-виконує звичайні (sync) функції в окремому потоці (threadpool), тому виклик
-smtplib (який сам по собі блокуючий, не async) НЕ заблокує основний
-event loop застосунку, поки лист відправляється.
-"""
 import logging
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -20,15 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 def send_email(to_email: str, subject: str, html_body: str) -> None:
-    """
-    Базова функція відправки одного email-листа.
-
-    Навмисно "проковтує" (логує, але не піднімає далі) будь-які помилки -
-    якщо лист не надіслався (наприклад, Gmail тимчасово недоступний),
-    це НЕ повинно ламати роботу застосунку. Користувач уже отримав
-    свою відповідь (JWT-токен) до того, як ця функція взагалі почала
-    виконуватись - лист це лише додатковий бонус, не критична частина логіки.
-    """
+    
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
     message["From"] = f"{settings.SMTP_FROM_NAME} <{settings.SMTP_FROM_EMAIL}>"
@@ -50,10 +31,7 @@ def send_email(to_email: str, subject: str, html_body: str) -> None:
 
 
 def send_google_login_notification(to_email: str, full_name: str) -> None:
-    """
-    Лист-нотифікація: "Ви щойно увійшли через Google".
-    Викликається як фонова задача (BackgroundTasks) з google_oauth.py.
-    """
+    
     subject = "Вхід через Google - KidMarket"
     html_body = f"""
     <html>
@@ -61,6 +39,36 @@ def send_google_login_notification(to_email: str, full_name: str) -> None:
             <h2>Привіт, {full_name}!</h2>
             <p>Ви щойно увійшли в KidMarket за допомогою вашого облікового запису Google.</p>
             <p>Якщо це були не ви - будь ласка, перевірте безпеку свого Google-акаунту.</p>
+            <hr>
+            <p style="color: #888; font-size: 12px;">
+                Це автоматичний лист, будь ласка, не відповідайте на нього.
+            </p>
+        </body>
+    </html>
+    """
+    send_email(to_email, subject, html_body)
+
+def send_password_reset_email(to_email: str, full_name: str, reset_link: str) -> None:
+    """
+    Лист із посиланням для скидання пароля.
+    Викликається як фонова задача з auth/router.py.
+    """
+    subject = "Скидання пароля - KidMarket"
+    html_body = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <h2>Привіт, {full_name}!</h2>
+            <p>Ви (або хтось від вашого імені) запросили скидання пароля для акаунту KidMarket.</p>
+            <p>
+                <a href="{reset_link}"
+                   style="display: inline-block; padding: 12px 24px; background-color: #4F46E5;
+                          color: #ffffff; text-decoration: none; border-radius: 6px;">
+                    Встановити новий пароль
+                </a>
+            </p>
+            <p>Посилання дійсне протягом 15 хвилин.</p>
+            <p>Якщо ви не запитували скидання пароля - просто проігноруйте цей лист,
+               ваш пароль залишиться без змін.</p>
             <hr>
             <p style="color: #888; font-size: 12px;">
                 Це автоматичний лист, будь ласка, не відповідайте на нього.
