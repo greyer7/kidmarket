@@ -1,10 +1,11 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.config import settings
 from app.core.email import send_password_reset_email, send_verification_email
+from app.core.rate_limit import check_rate_limit
 from app.auth.schemas import (
     UserRegister,
     UserResponse,
@@ -39,9 +40,12 @@ router.include_router(google_router)
 )
 async def register(
     data: UserRegister,
+    request: Request,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ) -> UserResponse:
+    await check_rate_limit(request, "register", max_requests=3, window_seconds=60)
+
     try:
         user = await register_user(data, db)
 
@@ -67,9 +71,12 @@ async def register(
     response_model=TokenResponse,
 )
 async def login(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db),
 ) -> TokenResponse:
+    await check_rate_limit(request, "login", max_requests=5, window_seconds=60)
+
     try:
         token = await login_user(form_data.username, form_data.password, db)
         return token
@@ -97,15 +104,13 @@ async def get_me(
 )
 async def forgot_password(
     data: ForgotPasswordRequest,
+    request: Request,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """
-    ВАЖЛИВО: відповідь ЗАВЖДИ однакова, незалежно від того, чи існує такий
-    email у базі. Це навмисний захист від "user enumeration" - зловмисник
-    не повинен мати змогу дізнатись, які email зареєстровані в системі,
-    просто пробуючи різні адреси і порівнюючи відповіді.
-    """
+    
+    await check_rate_limit(request, "forgot_password", max_requests=3, window_seconds=60)
+
     result = await create_password_reset_token(data.email, db)
 
     if result is not None:
@@ -165,10 +170,12 @@ async def verify_email(
 )
 async def resend_verification(
     data: ResendVerificationRequest,
+    request: Request,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    # Та сама логіка "завжди однакова відповідь", що й у forgot_password.
+    await check_rate_limit(request, "resend_verification", max_requests=3, window_seconds=60)
+
     result = await create_resend_verification_token(data.email, db)
 
     if result is not None:
