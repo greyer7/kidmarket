@@ -53,6 +53,11 @@ function HomePage() {
 
   useEffect(() => {
     fetchListings()
+    // fetchListings навмисно не в масиві залежностей - цей ефект має
+    // виконатись РІВНО ОДИН РАЗ при завантаженні сторінки (fetchListings -
+    // звичайна функція, не useCallback, тому її додавання спричинило б
+    // повторний виклик на кожному рендері).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleFilter = (e) => {

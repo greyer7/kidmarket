@@ -34,7 +34,10 @@ function ChatPage() {
         conversation.listing_id,
       )
       setMessages(data)
-    } catch {}
+    } catch {
+      // Ігноруємо помилки під час періодичного опитування (polling) -
+      // тимчасовий збій мережі не повинен "зупиняти" чат чи показувати помилку.
+    }
   }, [])
 
   const startPolling = useCallback((conversation) => {
@@ -76,6 +79,11 @@ function ChatPage() {
       )
       if (found) openConversation(found)
     }
+    // openConversation навмисно не в масиві залежностей - це звичайна
+    // функція (не useCallback), тому додавання її сюди змушувало б
+    // ефект спрацьовувати на КОЖНОМУ рендері, а не лише коли реально
+    // змінюються conversations/searchParams.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversations, searchParams])
 
   const openConversation = async (conversation) => {

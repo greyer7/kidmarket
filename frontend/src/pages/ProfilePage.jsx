@@ -340,7 +340,7 @@ function ProfilePage() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Фото (необов'язково)</label>
+              <label className="form-label">Фото (необов&apos;язково)</label>
               {newListing.image_urls ? (
                 <div style={{ marginBottom: '8px' }}>
                   <img

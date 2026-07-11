@@ -104,7 +104,7 @@ function AdminPage() {
               <thead>
                 <tr>
                   <th>Email</th>
-                  <th>Ім'я</th>
+                  <th>Ім&apos;я</th>
                   <th>Статус</th>
                   <th>Дія</th>
                 </tr>
