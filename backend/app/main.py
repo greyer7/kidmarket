@@ -12,6 +12,7 @@ from app.listings.router import router as listings_router
 from app.reviews.router import router as reviews_router
 from app.chat.router import router as chat_router
 from app.admin.router import router as admin_router
+from app.payments.router import router as payments_router
 
 UPLOAD_DIR = "/app/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -49,6 +50,7 @@ app.include_router(listings_router, prefix="/api")
 app.include_router(reviews_router, prefix="/api")
 app.include_router(chat_router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
+app.include_router(payments_router, prefix="/api")
 
 
 @app.get("/health")

@@ -8,6 +8,8 @@ import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
 import VerifyEmailPage from './pages/VerifyEmailPage.jsx'
 import GoogleCallbackPage from './pages/GoogleCallbackPage.jsx'
 import ListingPage from './pages/ListingPage.jsx'
+import PaymentSuccessPage from './pages/PaymentSuccessPage.jsx'
+import PaymentCancelPage from './pages/PaymentCancelPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import AdminPage from './pages/AdminPage.jsx'
 import ChatPage from './pages/ChatPage.jsx'
@@ -42,6 +44,8 @@ function App() {
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/auth/callback" element={<GoogleCallbackPage />} />
             <Route path="/listings/:id" element={<ListingPage />} />
+            <Route path="/payments/success" element={<PaymentSuccessPage />} />
+            <Route path="/payments/cancel" element={<PaymentCancelPage />} />
             <Route
               path="/profile"
               element={

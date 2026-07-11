@@ -43,5 +43,9 @@ class Settings(BaseSettings):
     SMTP_FROM_EMAIL: str
     SMTP_FROM_NAME: str = "KidMarket"
 
+    STRIPE_SECRET_KEY: str
+    STRIPE_PUBLISHABLE_KEY: str
+    STRIPE_WEBHOOK_SECRET: str = ""
+
 
 settings = Settings()
