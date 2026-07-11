@@ -47,5 +47,7 @@ class Settings(BaseSettings):
     STRIPE_PUBLISHABLE_KEY: str
     STRIPE_WEBHOOK_SECRET: str = ""
 
+    UPLOAD_DIR: str = "/app/uploads"
+
 
 settings = Settings()

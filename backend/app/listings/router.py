@@ -27,7 +27,7 @@ from app.listings.service import (
 
 router = APIRouter(prefix="/listings", tags=["listings"])
 
-UPLOAD_DIR = "/app/uploads/listings"
+UPLOAD_DIR = f"{settings.UPLOAD_DIR}/listings"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 

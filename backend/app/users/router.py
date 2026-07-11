@@ -11,10 +11,11 @@ from app.auth.service import update_user
 from app.auth.dependencies import get_current_active_user
 from app.users.schemas import UserPublicResponse
 from app.users.service import get_user_public, get_all_users, deactivate_user
+from app.core.config import settings
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-UPLOAD_DIR = "/app/uploads/avatars"
+UPLOAD_DIR = f"{settings.UPLOAD_DIR}/avatars"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 

@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from app.core.config import settings
 from app.core.redis import close_redis, init_redis
 from app.auth.router import router as auth_router
 from app.users.router import router as users_router
@@ -14,7 +15,7 @@ from app.chat.router import router as chat_router
 from app.admin.router import router as admin_router
 from app.payments.router import router as payments_router
 
-UPLOAD_DIR = "/app/uploads"
+UPLOAD_DIR = settings.UPLOAD_DIR
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(f"{UPLOAD_DIR}/avatars", exist_ok=True)
 os.makedirs(f"{UPLOAD_DIR}/listings", exist_ok=True)
