@@ -30,6 +30,8 @@ function VerifyEmailPage() {
     }
 
     verify()
+    // Токен не змінюється протягом життя компонента - викликаємо лише один раз.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
