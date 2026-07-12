@@ -47,3 +47,26 @@ class TokenResponse(BaseModel):
 class TokenPayload(BaseModel):
     sub: str
     exp: datetime
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str = Field(min_length=8)
+
+    @field_validator('new_password')
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        if len(v.encode('utf-8')) > 72:
+            raise ValueError('Пароль занадто довгий (максимум 72 байти в кодуванні UTF-8)')
+        return v
+
+
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr

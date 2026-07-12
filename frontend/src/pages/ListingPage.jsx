@@ -23,6 +23,9 @@ function ListingPage() {
   const [messageLoading, setMessageLoading] = useState(false)
   const [messageSent, setMessageSent] = useState(false)
 
+  const [buyLoading, setBuyLoading] = useState(false)
+  const [buyError, setBuyError] = useState('')
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -95,6 +98,23 @@ function ListingPage() {
     }
   }
 
+  const handleBuy = async () => {
+    setBuyError('')
+    setBuyLoading(true)
+
+    try {
+      const response = await apiClient.post('/payments/create-checkout-session', {
+        listing_id: parseInt(id),
+      })
+      window.location.href = response.data.checkout_url
+    } catch (err) {
+      setBuyError(
+        err.response?.data?.detail || 'Не вдалося розпочати оплату. Спробуйте ще раз.'
+      )
+      setBuyLoading(false)
+    }
+  }
+
   if (loading) return <Loader />
   if (error) return <p className="text-error">{error}</p>
   if (!listing) return null
@@ -144,6 +164,23 @@ function ListingPage() {
               Продавець: <strong>{listing.seller.full_name}</strong>
             </p>
           </div>
+
+          {isAuthenticated && !isOwner && listing.status === 'active' && (
+            <div className="listing-page__buy">
+              <button
+                onClick={handleBuy}
+                disabled={buyLoading}
+                className="btn btn-primary"
+              >
+                {buyLoading ? 'Перенаправлення...' : 'Купити'}
+              </button>
+              {buyError && <p className="text-error">{buyError}</p>}
+            </div>
+          )}
+
+          {listing.status === 'sold' && (
+            <p className="text-muted">Цей товар вже продано</p>
+          )}
 
           {isOwner && (
             <div className="listing-page__owner-actions">

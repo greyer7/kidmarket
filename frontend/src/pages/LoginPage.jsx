@@ -36,8 +36,6 @@ function LoginPage() {
 
     try {
       const response = await apiClient.get('/auth/google')
-      // Переходимо на сторінку Google - користувач залишить наш сайт,
-      // тому це window.location, а не react-router navigate.
       window.location.href = response.data.authorize_url
     } catch (err) {
       setError('Не вдалося розпочати вхід через Google. Спробуйте ще раз.')
@@ -78,6 +76,10 @@ function LoginPage() {
               className="form-input"
             />
           </div>
+
+          <p className="auth-subtitle">
+            <Link to="/forgot-password">Забули пароль?</Link>
+          </p>
 
           {error && (
             <p className="text-error">{error}</p>
